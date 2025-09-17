@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Learning Skill Tree - Quest Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #050505;
+            background-image: 
+                radial-gradient(ellipse at top left, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            margin: 30px 0;
+            overflow: hidden;
+            position: relative;
+            border-radius: 100px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 100px;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 0.9em;
+            top: -25px;
+        }
+
+        .skill-tree {
+            display: grid;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .tier {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tier:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .tier-title {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #e2e8f0;
+        }
+
+        .tier-icon {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 900;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .skill {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .skill:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .skill:hover::before {
+            opacity: 1;
+        }
+
+        .skill.unlocked {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            animation: unlock 0.5s ease;
+        }
+
+        .skill.unlocked::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .skill.locked {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+
+        @keyframes unlock {
+            0% { 
+                transform: scale(1) rotate(0deg); 
+            }
+            50% { 
+                transform: scale(1.05) rotate(1deg); 
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+            }
+        }
+
+        .skill-icon {
+            font-size: 2em;
+            margin-bottom: 12px;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-align: center;
+            font-size: 0.95em;
+            color: #e2e8f0;
+        }
+
+        .skill-desc {
+            font-size: 0.8em;
+            opacity: 0.5;
+            text-align: center;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .skill-points {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(139, 92, 246, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #a78bfa;
+            font-weight: 600;
+        }
+
+        .quest-indicator {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.75em;
+            color: #3b82f6;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .tier-1 { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+        }
+        .tier-2 { 
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, transparent 100%);
+        }
+        .tier-3 { 
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, transparent 100%);
+        }
+        .tier-4 { 
+            background: linear-gradient(135deg, rgba(217, 70, 239, 0.05) 0%, transparent 100%);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            color: #94a3b8;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.3s ease;
+            backdrop-filter: blur(20px);
+        }
+
+        @keyframes modalSlide {
+            from { 
+                transform: translateY(-50px) scale(0.95); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #e2e8f0;
+        }
+
+        .close {
+            color: #94a3b8;
+            font-size: 24px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .close:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.4);
+            color: #e2e8f0;
+        }
+
+        .quest-list {
+            margin: 20px 0;
+        }
+
+        .quest-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .quest-section-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.1em;
+        }
+
+        .quest-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .quest-item:hover {
+            background: rgba(139, 92, 246, 0.05);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .quest-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: #8b5cf6;
+        }
+
+        .quest-text {
+            flex: 1;
+            font-size: 0.9em;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .quest-item.completed .quest-text {
+            text-decoration: line-through;
+            opacity: 0.4;
+        }
+
+        .mastery-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+            padding: 14px 30px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mastery-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .mastery-button:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            color: #64748b;
+        }
+
+        .resources {
+            background: rgba(59, 130, 246, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .resources-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #3b82f6;
+        }
+
+        .resource-link {
+            display: block;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .resource-link:before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .resource-link:hover {
+            color: #3b82f6;
+            padding-left: 20px;
+        }
+
+        .resource-link:hover:before {
+            transform: translateX(5px);
+        }
+
+        .help-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85em;
+            opacity: 0.5;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>React Developer Skill Tree</h1>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-text" id="progressText">0% Complete</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="unlockedCount">0</div>
+                <div class="stat-label">Skills Unlocked</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="totalCount">24</div>
+                <div class="stat-label">Total Skills</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="questsComplete">0</div>
+                <div class="stat-label">Quests Complete</div>
+            </div>
+        </div>
+
+        <div class="help-text">Click any skill to view quests and resources</div>
+
+        <div class="skill-tree">
+            <!-- Tier 1: Foundation -->
+            <div class="tier tier-1">
+                <div class="tier-title">
+                    <span class="tier-icon">LV.1</span>
+                    Foundation
+                </div>
+                <div class="skills-grid">
+                    <div class="skill" data-tier="1" data-skill="html-basics">
+                        <div class="skill-points">+10 XP</div>
+                        <div class="skill-icon">📄</div>
+                        <div class="skill-name">HTML Basics</div>
+                        <div class="skill-desc">Elements, attributes, semantic HTML</div>
+                        <div class="quest-indicator">View Quests</div>
+                    </div>
+                    <div class="skill" data-tier="1" data-skill="css-basics">
+                        <div class="skill-points">+10 XP</div>
+                        <div class="skill-icon">🎨</div>
+                        <div class="skill-name">CSS Basics</div>
+                        <div class="skill-desc">Selectors, box model, flexbox</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill" data-tier="1" data-skill="js-variables">
+                        <div class="skill-points">+15 XP</div>
+                        <div class="skill-icon">📦</div>
+                        <div class="skill-name">JS Variables & Types</div>
+                        <div class="skill-desc">let, const, strings, numbers, arrays</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill" data-tier="1" data-skill="js-functions">
+                        <div class="skill-points">+15 XP</div>
+                        <div class="skill-icon">⚙️</div>
+                        <div class="skill-name">JS Functions</div>
+                        <div class="skill-desc">Function declaration, arrow functions</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill" data-tier="1" data-skill="js-arrays">
+                        <div class="skill-points">+15 XP</div>
+                        <div class="skill-icon">📊</div>
+                        <div class="skill-name">Array Methods</div>
+                        <div class="skill-desc">map, filter, reduce, forEach</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill" data-tier="1" data-skill="js-objects">
+                        <div class="skill-points">+15 XP</div>
+                        <div class="skill-icon">📘</div>
+                        <div class="skill-name">Objects & JSON</div>
+                        <div class="skill-desc">Object literals, JSON parsing</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier 3: Advanced React -->
+            <div class="tier tier-3">
+                <div class="tier-title">
+                    <span class="tier-icon">LV.3</span>
+                    Advanced React
+                </div>
+                <div class="skills-grid">
+                    <div class="skill locked" data-tier="3" data-skill="useEffect">
+                        <div class="skill-points">+30 XP</div>
+                        <div class="skill-icon">🔄</div>
+                        <div class="skill-name">useEffect Hook</div>
+                        <div class="skill-desc">Side effects, cleanup, dependencies</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="3" data-skill="fetch">
+                        <div class="skill-points">+30 XP</div>
+                        <div class="skill-icon">🌐</div>
+                        <div class="skill-name">Data Fetching</div>
+                        <div class="skill-desc">fetch API, async/await, loading states</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="3" data-skill="forms">
+                        <div class="skill-points">+25 XP</div>
+                        <div class="skill-icon">📝</div>
+                        <div class="skill-name">Form Management</div>
+                        <div class="skill-desc">Controlled components, validation</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="3" data-skill="lifting">
+                        <div class="skill-points">+25 XP</div>
+                        <div class="skill-icon">⬆️</div>
+                        <div class="skill-name">Lifting State Up</div>
+                        <div class="skill-desc">Shared state, prop drilling</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="3" data-skill="keys">
+                        <div class="skill-points">+20 XP</div>
+                        <div class="skill-icon">🔑</div>
+                        <div class="skill-name">Lists & Keys</div>
+                        <div class="skill-desc">Rendering lists, unique keys</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="3" data-skill="custom-hooks">
+                        <div class="skill-points">+35 XP</div>
+                        <div class="skill-icon">🪝</div>
+                        <div class="skill-name">Custom Hooks</div>
+                        <div class="skill-desc">Creating reusable logic</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier 4: Professional -->
+            <div class="tier tier-4">
+                <div class="tier-title">
+                    <span class="tier-icon">LV.4</span>
+                    Professional Skills
+                </div>
+                <div class="skills-grid">
+                    <div class="skill locked" data-tier="4" data-skill="routing">
+                        <div class="skill-points">+40 XP</div>
+                        <div class="skill-icon">🗺️</div>
+                        <div class="skill-name">React Router</div>
+                        <div class="skill-desc">Navigation, routes, params</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="4" data-skill="context">
+                        <div class="skill-points">+40 XP</div>
+                        <div class="skill-icon">🌍</div>
+                        <div class="skill-name">Context API</div>
+                        <div class="skill-desc">Global state management</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="4" data-skill="typescript">
+                        <div class="skill-points">+45 XP</div>
+                        <div class="skill-icon">📘</div>
+                        <div class="skill-name">TypeScript + React</div>
+                        <div class="skill-desc">Type safety, interfaces</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="4" data-skill="testing">
+                        <div class="skill-points">+35 XP</div>
+                        <div class="skill-icon">🧪</div>
+                        <div class="skill-name">Testing</div>
+                        <div class="skill-desc">Unit tests, React Testing Library</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="4" data-skill="optimization">
+                        <div class="skill-points">+35 XP</div>
+                        <div class="skill-icon">⚡</div>
+                        <div class="skill-name">Performance</div>
+                        <div class="skill-desc">useMemo, useCallback, React.memo</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="4" data-skill="deployment">
+                        <div class="skill-points">+30 XP</div>
+                        <div class="skill-icon">🚀</div>
+                        <div class="skill-name">Deployment</div>
+                        <div class="skill-desc">Build process, hosting, CI/CD</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other tiers remain the same structure -->
+            <div class="tier tier-2">
+                <div class="tier-title">
+                    <span class="tier-icon">[02]</span>
+                    Tier 2: React Core
+                </div>
+                <div class="skills-grid">
+                    <div class="skill locked" data-tier="2" data-skill="jsx">
+                        <div class="skill-points">+20 XP</div>
+                        <div class="skill-icon">🔧</div>
+                        <div class="skill-name">JSX Syntax</div>
+                        <div class="skill-desc">JSX rules, expressions, fragments</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="2" data-skill="components">
+                        <div class="skill-points">+20 XP</div>
+                        <div class="skill-icon">🧩</div>
+                        <div class="skill-name">Components</div>
+                        <div class="skill-desc">Functional components, composition</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="2" data-skill="props">
+                        <div class="skill-points">+20 XP</div>
+                        <div class="skill-icon">📨</div>
+                        <div class="skill-name">Props</div>
+                        <div class="skill-desc">Passing data, prop types, children</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="2" data-skill="state">
+                        <div class="skill-points">+25 XP</div>
+                        <div class="skill-icon">💾</div>
+                        <div class="skill-name">useState Hook</div>
+                        <div class="skill-desc">State management, updates, arrays/objects</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="2" data-skill="events">
+                        <div class="skill-points">+20 XP</div>
+                        <div class="skill-icon">👆</div>
+                        <div class="skill-name">Event Handling</div>
+                        <div class="skill-desc">onClick, onChange, form handling</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                    <div class="skill locked" data-tier="2" data-skill="conditional">
+                        <div class="skill-points">+20 XP</div>
+                        <div class="skill-icon">🔀</div>
+                        <div class="skill-name">Conditional Rendering</div>
+                        <div class="skill-desc">if/else, ternary, && operator</div>
+                        <div class="quest-indicator">📋 View Quests</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quest Modal -->
+    <div id="questModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">
+                    <span id="modalIcon">📄</span>
+                    <span id="modalSkillName">Skill Name</span>
+                </div>
+                <span class="close">&times;</span>
+            </div>
+            <div id="questContent">
+                <!-- Quest content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quest data for each skill
+        const skillQuests = {
+            'html-basics': {
+                icon: '📄',
+                quests: {
+                    'Build Without Help': [
+                        'Create a basic webpage with header, main, and footer sections',
+                        'Build a navigation menu using <nav> and <ul>/<li> tags',
+                        'Create a contact form with text inputs, email, and submit button',
+                        'Build a table with headers and at least 5 rows of data'
+                    ],
+                    'Understand & Explain': [
+                        'Explain the difference between <div> and <span>',
+                        'Know when to use semantic tags (article, section, aside, figure)',
+                        'Understand the purpose of meta tags and DOCTYPE',
+                        'Explain what accessibility attributes do (alt, aria-label)'
+                    ],
+                    'Debug & Fix': [
+                        'Fix broken HTML with missing closing tags',
+                        'Validate HTML using W3C validator and fix all errors',
+                        'Convert a div-soup layout to semantic HTML'
+                    ]
+                },
+                resources: [
+                    { name: 'MDN HTML Basics', url: 'https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics' },
+                    { name: 'FreeCodeCamp HTML', url: 'https://www.freecodecamp.org/learn/responsive-web-design/#basic-html-and-html5' },
+                    { name: 'HTML Reference', url: 'https://htmlreference.io/' }
+                ]
+            },
+            'css-basics': {
+                icon: '🎨',
+                quests: {
+                    'Build Without Help': [
+                        'Style a webpage with custom fonts, colors, and spacing',
+                        'Create a flexbox layout with centered content',
+                        'Build a responsive navigation bar that works on mobile',
+                        'Create hover effects for buttons and links',
+                        'Build a card component with shadow and border-radius'
+                    ],
+                    'Understand & Explain': [
+                        'Explain the CSS box model (margin, border, padding, content)',
+                        'Know the difference between inline, block, and inline-block',
+                        'Understand CSS specificity and inheritance',
+                        'Explain how flexbox main axis and cross axis work'
+                    ],
+                    'Debug & Fix': [
+                        'Fix layout issues using browser DevTools',
+                        'Solve a centering problem (both horizontal and vertical)',
+                        'Debug why styles aren\'t applying (specificity issues)'
+                    ]
+                },
+                resources: [
+                    { name: 'CSS Tricks Flexbox Guide', url: 'https://css-tricks.com/snippets/css/a-guide-to-flexbox/' },
+                    { name: 'MDN CSS Basics', url: 'https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/CSS_basics' },
+                    { name: 'Flexbox Froggy Game', url: 'https://flexboxfroggy.com/' }
+                ]
+            },
+            'js-variables': {
+                icon: '📦',
+                quests: {
+                    'Build Without Help': [
+                        'Declare variables using let and const appropriately',
+                        'Create and manipulate different data types (string, number, boolean)',
+                        'Build a simple calculator that stores values in variables',
+                        'Create a mad libs game using string concatenation/template literals'
+                    ],
+                    'Understand & Explain': [
+                        'Explain the difference between let, const, and var',
+                        'Know what hoisting means and how it affects variables',
+                        'Understand type coercion (automatic type conversion)',
+                        'Explain the difference between == and ==='
+                    ],
+                    'Common Pitfalls to Master': [
+                        'Avoid accidental global variables',
+                        'Handle undefined and null values properly',
+                        'Use const by default, let when needed'
+                    ]
+                },
+                resources: [
+                    { name: 'JavaScript.info Variables', url: 'https://javascript.info/variables' },
+                    { name: 'MDN JavaScript Guide', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide' },
+                    { name: 'FreeCodeCamp JavaScript', url: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/' }
+                ]
+            },
+            'js-functions': {
+                icon: '⚙️',
+                quests: {
+                    'Build Without Help': [
+                        'Write a function that calculates the area of a rectangle',
+                        'Create a function that validates email format',
+                        'Build a temperature converter (Celsius to Fahrenheit)',
+                        'Write both regular functions and arrow functions'
+                    ],
+                    'Understand & Explain': [
+                        'Explain function scope and closure',
+                        'Know when to use arrow functions vs regular functions',
+                        'Understand the "return" keyword and what happens without it',
+                        'Explain what "this" refers to in different contexts'
+                    ],
+                    'Advanced Patterns': [
+                        'Use functions as arguments (callbacks)',
+                        'Return functions from other functions',
+                        'Use default parameters and rest parameters'
+                    ]
+                },
+                resources: [
+                    { name: 'MDN Functions Guide', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions' },
+                    { name: 'JavaScript.info Functions', url: 'https://javascript.info/function-basics' },
+                    { name: 'Arrow Functions Explained', url: 'https://www.freecodecamp.org/news/arrow-functions-in-javascript-explained/' }
+                ]
+            },
+            'js-arrays': {
+                icon: '📊',
+                quests: {
+                    'Build Without Help': [
+                        'Filter an array to find all numbers greater than 10',
+                        'Use map to transform an array of numbers (double each)',
+                        'Find the sum of all numbers using reduce',
+                        'Sort an array of objects by a property',
+                        'Remove duplicates from an array'
+                    ],
+                    'Understand & Explain': [
+                        'Know which methods mutate arrays vs create new ones',
+                        'Explain how map differs from forEach',
+                        'Understand when to use filter vs find',
+                        'Know how reduce works with accumulator'
+                    ],
+                    'Real-World Tasks': [
+                        'Process a list of products (filter by price, sort by name)',
+                        'Calculate statistics from an array of numbers',
+                        'Transform API data into the format your UI needs'
+                    ]
+                },
+                resources: [
+                    { name: 'MDN Array Methods', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array' },
+                    { name: 'JavaScript Array Methods Tutorial', url: 'https://www.freecodecamp.org/news/javascript-array-methods/' },
+                    { name: 'Array Explorer Tool', url: 'https://arrayexplorer.netlify.app/' }
+                ]
+            },
+            'js-objects': {
+                icon: '📘',
+                quests: {
+                    'Build Without Help': [
+                        'Create an object representing a user with properties and methods',
+                        'Access nested object properties safely',
+                        'Convert JSON string to object and vice versa',
+                        'Merge two objects together',
+                        'Loop through object properties'
+                    ],
+                    'Understand & Explain': [
+                        'Know the difference between dot notation and bracket notation',
+                        'Understand object destructuring',
+                        'Explain pass-by-reference vs pass-by-value',
+                        'Know what JSON can and cannot represent'
+                    ],
+                    'API Readiness': [
+                        'Parse JSON response from an API',
+                        'Build an object to send as JSON to an API',
+                        'Handle nested JSON data structures'
+                    ]
+                },
+                resources: [
+                    { name: 'MDN Working with Objects', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects' },
+                    { name: 'JSON Introduction', url: 'https://www.json.org/json-en.html' },
+                    { name: 'JavaScript.info Objects', url: 'https://javascript.info/object' }
+                ]
+            },
+            'jsx': {
+                icon: '🔧',
+                quests: {
+                    'Build Without Help': [
+                        'Convert HTML to valid JSX (className, htmlFor, self-closing tags)',
+                        'Embed JavaScript expressions in JSX using {}',
+                        'Render a list of items using map()',
+                        'Use React Fragments to avoid wrapper divs'
+                    ],
+                    'Understand & Explain': [
+                        'Explain why className is used instead of class',
+                        'Know which attributes are camelCased in JSX',
+                        'Understand what JSX compiles to (React.createElement)',
+                        'Know the rules for JavaScript expressions in JSX'
+                    ],
+                    'Common Patterns': [
+                        'Conditionally add CSS classes',
+                        'Inline styles using style object',
+                        'Handle events in JSX'
+                    ]
+                },
+                resources: [
+                    { name: 'React Docs: JSX', url: 'https://react.dev/learn/writing-markup-with-jsx' },
+                    { name: 'JSX in Depth', url: 'https://legacy.reactjs.org/docs/jsx-in-depth.html' },
+                    { name: 'Transform HTML to JSX', url: 'https://transform.tools/html-to-jsx' }
+                ]
+            },
+            'components': {
+                icon: '🧩',
+                quests: {
+                    'Build Without Help': [
+                        'Create a functional component that returns JSX',
+                        'Build a Card component for displaying content',
+                        'Create a Button component with different variants',
+                        'Compose multiple components into a page'
+                    ],
+                    'Understand & Explain': [
+                        'Know when to split something into a component',
+                        'Understand component naming conventions',
+                        'Explain component composition vs inheritance',
+                        'Know what makes a good reusable component'
+                    ],
+                    'Best Practices': [
+                        'Keep components small and focused',
+                        'Make components reusable',
+                        'Organize components in folders'
+                    ]
+                },
+                resources: [
+                    { name: 'React Docs: Your First Component', url: 'https://react.dev/learn/your-first-component' },
+                    { name: 'Thinking in React', url: 'https://react.dev/learn/thinking-in-react' },
+                    { name: 'Component Patterns', url: 'https://www.patterns.dev/posts/reactpatterns' }
+                ]
+            },
+            'props': {
+                icon: '📨',
+                quests: {
+                    'Build Without Help': [
+                        'Pass different data types as props (strings, numbers, objects, functions)',
+                        'Use destructuring to extract props',
+                        'Set default props for a component',
+                        'Pass all props to child using spread operator',
+                        'Use children prop for component composition'
+                    ],
+                    'Understand & Explain': [
+                        'Explain why props are read-only',
+                        'Know how data flows in React (one-way)',
+                        'Understand prop drilling and its problems',
+                        'Know when to use children vs regular props'
+                    ],
+                    'Patterns to Master': [
+                        'Create flexible components with props',
+                        'Build a component with optional props',
+                        'Type check props (PropTypes or TypeScript basics)'
+                    ]
+                },
+                resources: [
+                    { name: 'React Docs: Passing Props', url: 'https://react.dev/learn/passing-props-to-a-component' },
+                    { name: 'Props vs State', url: 'https://kentcdodds.com/blog/props-vs-state' },
+                    { name: 'Component Props Patterns', url: 'https://www.patterns.dev/posts/render-props-pattern' }
+                ]
+            },
+            'state': {
+                icon: '💾',
+                quests: {
+                    'Build Without Help': [
+                        'Create a counter that increments/decrements',
+                        'Build a toggle switch (on/off)',
+                        'Create a form input that updates as you type',
+                        'Manage an array in state (add/remove items)',
+                        'Update nested objects in state correctly'
+                    ],
+                    'Understand & Explain': [
+                        'Know why direct state mutation is bad',
+                        'Explain state batching in React',
+                        'Understand when React re-renders',
+                        'Know when to use state vs regular variables'
+                    ],
+                    'Common Patterns': [
+                        'Toggle boolean state',
+                        'Update arrays without mutation (spread, filter, map)',
+                        'Update objects immutably',
+                        'Derive state vs storing everything'
+                    ]
+                },
+                resources: [
+                    { name: 'React Docs: State', url: 'https://react.dev/learn/state-a-components-memory' },
+                    { name: 'useState Hook Guide', url: 'https://react.dev/reference/react/useState' },
+                    { name: 'State Management Patterns', url: 'https://kentcdodds.com/blog/dont-sync-state-derive-it' }
+                ]
+            },
+            'events': {
+                icon: '👆',
+                quests: {
+                    'Build Without Help': [
+                        'Handle button clicks to trigger actions',
+                        'Create a form with onSubmit handler',
+                        'Build an input with onChange tracking',
+                        'Implement hover effects with mouse events',
+                        'Prevent default form submission'
+                    ],
+                    'Understand & Explain': [
+                        'Know how React synthetic events work',
+                        'Understand event bubbling and stopPropagation',
+                        'Explain why we use arrow functions or bind',
+                        'Know how to access event properties'
+                    ],
+                    'Advanced Patterns': [
+                        'Pass parameters to event handlers',
+                        'Debounce input events',
+                        'Handle keyboard shortcuts'
+                    ]
+                },
+                resources: [
+                    { name: 'React Docs: Responding to Events', url: 'https://react.dev/learn/responding-to-events' },
+                    { name: 'Handling Events', url: 'https://legacy.reactjs.org/docs/handling-events.html' },
+                    { name: 'Event Handler Best Practices', url: 'https://www.freecodecamp.org/news/event-handlers-in-react/' }
+                ]
+            },
+            'conditional': {
+                icon: '🔀',
+                quests: {
+                    'Build Without Help': [
+                        'Show/hide elements based on state',
+                        'Render different components based on conditions',
+                        'Display loading, error, and success states',
+                        'Create a tab component that shows different content',
+                        'Build conditional CSS classes'
+                    ],
+                    'Understand & Explain': [
+                        'Know when to use && operator vs ternary',
+                        'Understand truthy/falsy values in conditionals',
+                        'Explain why if/else doesn\'t work directly in JSX',
+                        'Know how to handle multiple conditions cleanly'
+                    ],
+                    'Patterns to Master': [
+                        'Loading states pattern',
+                        'Error boundary basics',
+                        'Conditional styling approaches'
+                    ]
+                },
+                resources: [
+                    { name: 'React Docs: Conditional Rendering', url: 'https://react.dev/learn/conditional-rendering' },
+                    { name: 'Conditional Rendering Patterns', url: 'https://www.robinwieruch.de/conditional-rendering-react/' },
+                    { name: 'React Conditional Examples', url: 'https://blog.logrocket.com/react-conditional-rendering-9-methods/' }
+                ]
+            }
+        };
+
+        // State management
+        let unlockedSkills = JSON.parse(localStorage.getItem('reactSkillTree')) || {};
+        let questProgress = JSON.parse(localStorage.getItem('questProgress')) || {};
+        let currentSkill = null;
+
+        // Initialize
+        function initSkillTree() {
+            updateProgress();
+            restoreUnlockedSkills();
+            setupEventListeners();
+            updateQuestCount();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Skill click handlers
+            document.querySelectorAll('.skill').forEach(skill => {
+                skill.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    if (this.classList.contains('locked') && !e.target.classList.contains('quest-indicator')) {
+                        return;
+                    }
+
+                    const skillId = this.dataset.skill;
+                    openQuestModal(skillId);
+                });
+            });
+
+            // Modal close handler
+            document.querySelector('.close').addEventListener('click', closeModal);
+            
+            // Click outside modal to close
+            window.addEventListener('click', function(e) {
+                const modal = document.getElementById('questModal');
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Open quest modal
+        function openQuestModal(skillId) {
+            currentSkill = skillId;
+            const modal = document.getElementById('questModal');
+            const skillData = skillQuests[skillId];
+            
+            if (!skillData) {
+                console.error('No quest data for skill:', skillId);
+                return;
+            }
+
+            // Update modal header
+            document.getElementById('modalIcon').textContent = skillData.icon;
+            const skillElement = document.querySelector(`[data-skill="${skillId}"]`);
+            document.getElementById('modalSkillName').textContent = skillElement.querySelector('.skill-name').textContent;
+
+            // Generate quest content
+            let questHTML = '<div class="quest-list">';
+            
+            Object.keys(skillData.quests).forEach(section => {
+                questHTML += `
+                    <div class="quest-section">
+                        <div class="quest-section-title">✅ ${section}</div>
+                `;
+                
+                skillData.quests[section].forEach((quest, index) => {
+                    const questId = `${skillId}-${section}-${index}`;
+                    const isCompleted = questProgress[questId] || false;
+                    
+                    questHTML += `
+                        <div class="quest-item ${isCompleted ? 'completed' : ''}" data-quest-id="${questId}">
+                            <input type="checkbox" class="quest-checkbox" ${isCompleted ? 'checked' : ''}>
+                            <span class="quest-text">${quest}</span>
+                        </div>
+                    `;
+                });
+                
+                questHTML += '</div>';
+            });
+
+            // Add resources section
+            if (skillData.resources) {
+                questHTML += `
+                    <div class="resources">
+                        <div class="resources-title">📚 Free Learning Resources:</div>
+                `;
+                skillData.resources.forEach(resource => {
+                    questHTML += `<a href="${resource.url}" class="resource-link" target="_blank">→ ${resource.name}</a>`;
+                });
+                questHTML += '</div>';
+            }
+
+            // Add mastery button
+            const allQuests = getAllQuestsForSkill(skillId);
+            const completedQuests = allQuests.filter(qId => questProgress[qId]).length;
+            const isComplete = completedQuests === allQuests.length;
+            
+            questHTML += `
+                <button class="mastery-button" ${!isComplete ? 'disabled' : ''} id="masteryBtn">
+                    ${unlockedSkills[skillId] ? '✅ Skill Mastered!' : 'Mark as Mastered'} (${completedQuests}/${allQuests.length} quests)
+                </button>
+            `;
+            
+            questHTML += '</div>';
+
+            document.getElementById('questContent').innerHTML = questHTML;
+
+            // Add quest checkbox listeners
+            document.querySelectorAll('.quest-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', handleQuestToggle);
+            });
+
+            // Add mastery button listener
+            document.getElementById('masteryBtn').addEventListener('click', handleMastery);
+
+            modal.classList.add('show');
+        }
+
+        // Handle quest completion
+        function handleQuestToggle(e) {
+            const questItem = e.target.closest('.quest-item');
+            const questId = questItem.dataset.questId;
+            
+            questProgress[questId] = e.target.checked;
+            questItem.classList.toggle('completed', e.target.checked);
+            
+            localStorage.setItem('questProgress', JSON.stringify(questProgress));
+            
+            // Update mastery button
+            const allQuests = getAllQuestsForSkill(currentSkill);
+            const completedQuests = allQuests.filter(qId => questProgress[qId]).length;
+            const isComplete = completedQuests === allQuests.length;
+            
+            const masteryBtn = document.getElementById('masteryBtn');
+            masteryBtn.disabled = !isComplete;
+            masteryBtn.textContent = `${unlockedSkills[currentSkill] ? '✅ Skill Mastered!' : 'Mark as Mastered'} (${completedQuests}/${allQuests.length} quests)`;
+            
+            updateQuestCount();
+        }
+
+        // Get all quest IDs for a skill
+        function getAllQuestsForSkill(skillId) {
+            const skillData = skillQuests[skillId];
+            if (!skillData) return [];
+            
+            const questIds = [];
+            Object.keys(skillData.quests).forEach(section => {
+                skillData.quests[section].forEach((_, index) => {
+                    questIds.push(`${skillId}-${section}-${index}`);
+                });
+            });
+            return questIds;
+        }
+
+        // Handle mastery button
+        function handleMastery() {
+            const skillElement = document.querySelector(`[data-skill="${currentSkill}"]`);
+            
+            if (!unlockedSkills[currentSkill]) {
+                unlockedSkills[currentSkill] = true;
+                skillElement.classList.add('unlocked');
+            } else {
+                unlockedSkills[currentSkill] = false;
+                skillElement.classList.remove('unlocked');
+            }
+            
+            localStorage.setItem('reactSkillTree', JSON.stringify(unlockedSkills));
+            updateProgress();
+            checkTierUnlocking();
+            
+            const masteryBtn = document.getElementById('masteryBtn');
+            masteryBtn.textContent = unlockedSkills[currentSkill] ? '✅ Skill Mastered!' : 'Mark as Mastered';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('questModal').classList.remove('show');
+            currentSkill = null;
+        }
+
+        // Restore unlocked skills
+        function restoreUnlockedSkills() {
+            Object.keys(unlockedSkills).forEach(skillId => {
+                const skillElement = document.querySelector(`[data-skill="${skillId}"]`);
+                if (skillElement && unlockedSkills[skillId]) {
+                    skillElement.classList.add('unlocked');
+                }
+            });
+            checkTierUnlocking();
+        }
+
+        // Update progress
+        function updateProgress() {
+            const unlockedCount = Object.values(unlockedSkills).filter(v => v).length;
+            const percentage = Math.round((unlockedCount / 24) * 100);
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '% Complete';
+            document.getElementById('unlockedCount').textContent = unlockedCount;
+        }
+
+        // Update quest count
+        function updateQuestCount() {
+            const totalQuests = Object.keys(questProgress).filter(k => questProgress[k]).length;
+            document.getElementById('questsComplete').textContent = totalQuests;
+        }
+
+        // Check tier unlocking
+        function checkTierUnlocking() {
+            const tiers = [1, 2, 3, 4];
+            
+            tiers.forEach((tier, index) => {
+                if (index === 0) return;
+                
+                const previousTierSkills = document.querySelectorAll(`.skill[data-tier="${tier - 1}"]`);
+                const currentTierSkills = document.querySelectorAll(`.skill[data-tier="${tier}"]`);
+                
+                const unlockedInPrevious = Array.from(previousTierSkills).filter(s => 
+                    s.classList.contains('unlocked')
+                ).length;
+                
+                const shouldUnlock = unlockedInPrevious >= Math.floor(previousTierSkills.length * 0.8);
+                
+                currentTierSkills.forEach(skill => {
+                    if (shouldUnlock) {
+                        skill.classList.remove('locked');
+                    } else {
+                        if (!skill.classList.contains('unlocked')) {
+                            skill.classList.add('locked');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialize on load
+        initSkillTree();
+    </script>
+</body>
+</html>
